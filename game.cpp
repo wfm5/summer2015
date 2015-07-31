@@ -17,6 +17,17 @@ int GameData::Setup()
 	{
 		printf("SDL ErrorL %s \n", SDL_GetError());
 		return -1;
+	}else 
+	{ 
+		//Initialize renderer color 
+		SDL_SetRenderDrawColor( mRender, 0xFF, 0xFF, 0xFF, 0xFF ); 
+		//Initialize PNG loading 
+		int imgFlags = IMG_INIT_PNG; 
+		if( !( IMG_Init( imgFlags ) & imgFlags ) )
+		{ 
+			printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() ); 
+			return -1;
+		} 
 	}
 
 	if((mScreenSurface = SDL_GetWindowSurface(mWindow)) == NULL)
@@ -29,21 +40,27 @@ int GameData::Setup()
 		printf("SDL ErrorL %s \n", SDL_GetError());
 		return -1;
 	}
-	/*if( ( (game.mTexture = loadTexture("assets/track.bmp")) ) == NULL)
-	{
-		
-		printf("SDL ErrorL %s \n", SDL_GetError());
-		return -1;
-	}*/
+	//if( ( (game.mTexture = loadTexture("assets/track.png")) ) == NULL)
+	//{
+	//	printf("SDL ErrorL %s \n", SDL_GetError());
+		//return -1;
+	//}
+	 //Load PNG texture  
+	mRender = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED); 
+	if( (loadTexture( "assets/track.png" )) == NULL ) 
+	{ 
+		fprintf(stdout, "Failed to load texture image!\n" ); 
+		return -1; 
+	}
+
 	return 0;
 }
 /**
-*This function loads a texture at a given path name and prints it to a surface
-*The param is a file path within the project folder
-*function returns a SDL_Texture 
-* if it cannot be loaded it prints an error
-*if the texture returns null after loading it prints the error
-*/
+ * This function loads an image at a given path name and attempts to create
+ * an SDL_Texture from it.
+ * @params path A file path within the project folder
+ * @return An SDL_Texture if successful, NULL if not
+ */
 SDL_Texture *GameData::loadTexture( std::string path ) 
 { 
 	
@@ -60,6 +77,7 @@ SDL_Texture *GameData::loadTexture( std::string path )
 		if( newTexture == NULL ) 
 		{ 
 			printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() ); 
+			SDL_Delay(1000);
 		} 
 		//Get rid of old loaded surface 
 		SDL_FreeSurface( loadedSurface ); 
@@ -69,8 +87,17 @@ SDL_Texture *GameData::loadTexture( std::string path )
 
 int GameData::Shutdown()
 {
+	//Free images
+	SDL_DestroyTexture(mTexture);
+	mTexture = NULL;
+	//Destroy windows
+	SDL_DestroyRenderer(mRender);
 	SDL_FreeSurface(mSurface2);
 	SDL_DestroyWindow( mWindow );
+	mWindow = NULL;
+	mRender = NULL;
+	//Quit SDL sub systems
+	IMG_Quit();
 	SDL_Quit();
 	return 0;
 }
@@ -79,6 +106,10 @@ int GameData::Draw()
 {
 	SDL_UpdateWindowSurface(mWindow);
 	SDL_BlitSurface(mSurface2, NULL, mScreenSurface, NULL);
+	//Render texture to screen 
+	SDL_RenderCopy( mRender, mTexture, NULL, NULL ); 
+	//Update screen 
+	SDL_RenderPresent( mRender );
 	return 0;
 }
 
