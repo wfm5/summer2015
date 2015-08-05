@@ -1,9 +1,10 @@
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <stdio.h>
 #include <string>
 #include "game.h"
-
+#include "car.h"
 
 int GameData::Setup()
 {
@@ -40,21 +41,26 @@ int GameData::Setup()
 		printf("SDL ErrorL %s \n", SDL_GetError());
 		return -1;
 	}
-	//if( ( (game.mTexture = loadTexture("assets/track.png")) ) == NULL)
-	//{
-	//	printf("SDL ErrorL %s \n", SDL_GetError());
-		//return -1;
-	//}
-	 //Load PNG texture  
+	//Load PNG texture  
 	mRender = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED); 
-	if( (loadTexture( "assets/track.png" )) == NULL ) 
+	if( (mTexture = loadTexture( "assets/track.png" )) == NULL ) 
 	{ 
 		fprintf(stdout, "Failed to load texture image!\n" ); 
 		return -1; 
 	}
-
+	if( (mainCar.mCarTexture = loadTexture( "assets/racerSheet.png" )) == NULL ) 
+	{ 
+		fprintf(stdout, "Failed to load texture image!\n" ); 
+		return -1; 
+	}
+	if( (SetRect(1)) == NULL)
+	{
+		printf("No Player was selected.");
+		return -1;
+	}
 	return 0;
 }
+
 /**
  * This function loads an image at a given path name and attempts to create
  * an SDL_Texture from it.
@@ -77,7 +83,6 @@ SDL_Texture *GameData::loadTexture( std::string path )
 		if( newTexture == NULL ) 
 		{ 
 			printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() ); 
-			SDL_Delay(1000);
 		} 
 		//Get rid of old loaded surface 
 		SDL_FreeSurface( loadedSurface ); 
@@ -101,13 +106,17 @@ int GameData::Shutdown()
 	SDL_Quit();
 	return 0;
 }
-
-int GameData::Draw()
+int GameData::DrawBackground()
 {
-	SDL_UpdateWindowSurface(mWindow);
 	SDL_BlitSurface(mSurface2, NULL, mScreenSurface, NULL);
+	return 0;
+}
+int GameData::Draw()
+{	
+
 	//Render texture to screen 
-	SDL_RenderCopy( mRender, mTexture, NULL, NULL ); 
+	SDL_RenderCopy( mRender, mTexture, NULL, NULL );
+	SDL_RenderCopy (mRender, mainCar.mCarTexture, mainCar.mCarRect, NULL);
 	//Update screen 
 	SDL_RenderPresent( mRender );
 	return 0;

@@ -1,8 +1,10 @@
 #include <SDL.h>
 #include <string>
 #include "game.h"
+#include "car.h"
 
 GameData game;
+CarData mainCar;
 
 int main(int argv, char *args[])
 {

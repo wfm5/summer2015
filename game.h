@@ -23,6 +23,7 @@ public:
 
 	SDL_Texture *loadTexture(std::string path);
 	int Setup();
+	int DrawBackground();
 	int Run();
 	int Shutdown();
 };
